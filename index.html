@@ -2,117 +2,67 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>TraderArmy LFX PRO+</title>
+<title>TraderArmy Pro Charts</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Lightweight Charts -->
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
-body{
+body {
     margin:0;
     background:#0e0e0e;
-    color:#fff;
-    font-family:Arial;
+    color:white;
+    font-family: Arial;
 }
-header{
+
+header {
     background:#111;
     padding:10px;
+    border-bottom:1px solid #222;
     display:flex;
     gap:10px;
     flex-wrap:wrap;
-    border-bottom:1px solid #222;
 }
-select,button,input{
+
+button, select {
     background:#1a1a1a;
-    color:#fff;
+    color:white;
     border:1px solid #333;
-    padding:6px;
+    padding:6px 10px;
     border-radius:4px;
 }
-button{cursor:pointer}
 
-#charts{
+#charts {
     display:grid;
-    height:calc(100vh - 140px); /* footer için boşluk */
+    height: calc(100vh - 130px);
+    gap:5px;
 }
-.chart-box{
-    border:1px solid #222;
-    position:relative;
-}
-.chart{width:100%;height:100%;}
-.drawCanvas{
-    position:absolute;
-    inset:0;
-    pointer-events:none;
-}
-.drawCanvas.active{pointer-events:auto}
 
-/* TOOLBAR */
-#toolbar{
-    position:fixed;
-    top:100px;
-    left:10px;
-    background:#111;
-    border:1px solid #333;
-    padding:8px;
-    border-radius:8px;
+.chart-box {
+    border:1px solid #222;
     display:flex;
     flex-direction:column;
-    gap:6px;
-    z-index:9999;
-    cursor:move;
 }
-#toolbar button.active{background:#2962ff}
 
-/* SEARCH */
-#searchBox{width:200px}
-
-/* ALARM */
-#alarmBox{
-    position:fixed;
-    right:20px;
-    bottom:90px;
-    width:240px;
+.toolbar {
     background:#111;
-    border:1px solid #333;
-    padding:10px;
-    border-radius:8px;
-    display:none;
-    z-index:9999;
-}
-.alItem{
-    padding:5px;
     border-bottom:1px solid #222;
+    padding:5px;
     display:flex;
-    justify-content:space-between;
-    font-size:12px;
-}
-#alarmBtn{
-    position:fixed;
-    right:20px;
-    bottom:50px;
-    background:#2962ff;
-    padding:10px 16px;
-    border:none;
-    border-radius:6px;
-    font-weight:bold;
-    cursor:pointer;
+    gap:5px;
 }
 
-/* FOOTER */
-footer{
+footer {
+    background:#111;
+    color:#888;
+    text-align:center;
+    padding:12px;
+    font-size:13px;
+    border-top:1px solid #222;
     position:fixed;
     bottom:0;
     left:0;
     width:100%;
-    background:#0d0d0d;
-    border-top:1px solid #222;
-    padding:12px;
-    color:#888;
-    text-align:center;
-    font-size:13px;
-    z-index:999;
 }
 </style>
 </head>
@@ -120,216 +70,135 @@ footer{
 <body>
 
 <header>
-<strong>TraderArmy LFX PRO+</strong>
+    <strong>TraderArmy PRO</strong>
+    <button onclick="setLayout(1)">1 Grafik</button>
+    <button onclick="setLayout(2)">2 Grafik</button>
+    <button onclick="setLayout(4)">4 Grafik</button>
 
-<input id="searchBox" placeholder="Sembol Ara...">
-<select id="symbolSelect"></select>
+    <select id="pairSelect">
+        <optgroup label="Forex">
+            <option value="FX:EURUSD">EURUSD</option>
+            <option value="FX:GBPUSD">GBPUSD</option>
+            <option value="FX:USDJPY">USDJPY</option>
+            <option value="FX:XAUUSD">XAUUSD</option>
+            <option value="FX:USDCAD">USDCAD</option>
+        </optgroup>
 
-<select id="tfSelect">
-  <option value="1m">1m</option>
-  <option value="5m" selected>5m</option>
-  <option value="15m">15m</option>
-  <option value="1h">1H</option>
-  <option value="4h">4H</option>
-  <option value="1d">1D</option>
-</select>
+        <optgroup label="Kripto">
+            <option value="BINANCE:BTCUSDT">BTC/USDT</option>
+            <option value="BINANCE:ETHUSDT">ETH/USDT</option>
+            <option value="BINANCE:XRPUSDT">XRP/USDT</option>
+            <option value="BINANCE:ADAUSDT">ADA/USDT</option>
+        </optgroup>
 
-<button onclick="applyAll()">Uygula</button>
-
-<button onclick="setLayout(1)">1</button>
-<button onclick="setLayout(2)">2</button>
-<button onclick="setLayout(4)">4</button>
+        <optgroup label="Endeks">
+            <option value="OANDA:SPX500USD">S&P 500</option>
+            <option value="OANDA:NAS100USD">NASDAQ 100</option>
+            <option value="OANDA:UK100GBP">FTSE 100</option>
+        </optgroup>
+    </select>
 </header>
 
-<!-- TOOLBAR -->
-<div id="toolbar">
-<button onclick="setTool('trend',this)">Trend</button>
-<button onclick="setTool('hline',this)">Yatay</button>
-<button onclick="setTool('vline',this)">Dikey</button>
-<button onclick="setTool('rect',this)">Zone</button>
-<button onclick="setTool('brush',this)">Brush</button>
-<button onclick="setTool('long',this)">🟢 Long</button>
-<button onclick="setTool('short',this)">🔴 Short</button>
-<button onclick="clearDraw()">Sil</button>
-<button onclick="exitDraw()">Çık</button>
-</div>
-
-<!-- CHARTS -->
 <div id="charts"></div>
 
-<!-- ALARM -->
-<div id="alarmBox">
-<strong>Alarm Ekle</strong><br><br>
-<input id="alarmPrice" type="number" placeholder="Fiyat" style="width:100%;padding:6px"><br><br>
-<select id="alarmDir" style="width:100%;padding:6px">
-  <option value="up">YUKARI</option>
-  <option value="down">AŞAĞI</option>
-</select><br><br>
-<button onclick="addAlarm()" style="width:100%;background:#2962ff;padding:6px;border:none;border-radius:4px">Ekle</button>
-<div id="alarmList" style="margin-top:10px;max-height:150px;overflow-y:auto"></div>
-</div>
-
-<button id="alarmBtn" onclick="toggleAlarm()">🔔 ALARM</button>
-
 <footer>
-⚠️ <b>Yasal Uyarı:</b> Bu platformda yer alan grafikler, analizler, çizimler, alarmlar ve tüm içerikler 
-<b>yatırım tavsiyesi değildir</b>. Finansal piyasalarda yapılan işlemler yüksek risk içerir. 
-Oluşabilecek kâr veya zararlardan tamamen kullanıcı sorumludur.
+⚠️ Yasal Uyarı: Bu platform yatırım tavsiyesi içermez. Tüm işlemler risk içerir, sorumluluk kullanıcıya aittir.
 </footer>
 
 <script>
-/* ================== GLOBAL ================== */
-let layout=1, charts=[], series=[], canvases=[], tool=null;
-let drawings=JSON.parse(localStorage.getItem("drawings")||"[]");
-let alarms=JSON.parse(localStorage.getItem("alarms")||"[]");
+let layout = 1;
 
-/* ================== API KEY ================== */
-const TD_KEY = "YOUR_API_KEY_YAZ";
-
-/* ================== SYMBOLS ================== */
-async function loadSymbols(){
-    const sel=document.getElementById("symbolSelect");
-    const search=document.getElementById("searchBox");
-
-    const b=await fetch("https://api.binance.com/api/v3/exchangeInfo");
-    const bj=await b.json();
-    const crypto=bj.symbols.filter(s=>s.quoteAsset==="USDT").map(s=>s.symbol);
-
-    const fx=await fetch(`https://api.twelvedata.com/forex_pairs?apikey=${TD_KEY}`);
-    const fxj=await fx.json();
-    const forex=fxj.data.map(p=>p.symbol.replace("/",""));
-
-    const all=[...new Set([...crypto,...forex])].sort();
-
-    function render(){
-        sel.innerHTML="";
-        all.filter(s=>s.toLowerCase().includes(search.value.toLowerCase()))
-           .forEach(s=>sel.innerHTML+=`<option value="${s}">${s}</option>`);
-    }
-    search.oninput=render;
-    render();
+function setLayout(n){
+    layout = n;
+    renderCharts();
 }
 
-/* ================== LAYOUT ================== */
-function setLayout(n){layout=n;renderCharts();}
+function renderCharts(){
+    const area = document.getElementById("charts");
+    area.innerHTML = "";
 
-/* ================== CHARTS ================== */
-async function renderCharts(){
-    const cont=document.getElementById("charts");
-    cont.innerHTML="";
-    cont.style.gridTemplateColumns=layout===1?"1fr":layout===2?"1fr 1fr":"1fr 1fr";
+    if(layout === 1){
+        area.style.gridTemplateColumns = "1fr";
+        area.style.gridTemplateRows = "1fr";
+    }
+    if(layout === 2){
+        area.style.gridTemplateColumns = "1fr 1fr";
+        area.style.gridTemplateRows = "1fr";
+    }
+    if(layout === 4){
+        area.style.gridTemplateColumns = "1fr 1fr";
+        area.style.gridTemplateRows = "1fr 1fr";
+    }
 
-    charts=[];series=[];canvases=[];
-    for(let i=0;i<layout;i++){
-        cont.innerHTML+=`
-        <div class="chart-box">
-          <div class="chart" id="chart${i}"></div>
-          <canvas class="drawCanvas" id="canvas${i}"></canvas>
-        </div>`;
-        const chart=LightweightCharts.createChart(document.getElementById("chart"+i),{
-            layout:{background:{color:"#0e0e0e"},textColor:"#fff"},
-            grid:{vertLines:{color:"#222"},horzLines:{color:"#222"}},
-            timeScale:{timeVisible:true}
+    for(let i=0; i<layout; i++){
+        const box = document.createElement("div");
+        box.className = "chart-box";
+
+        const toolbar = document.createElement("div");
+        toolbar.className = "toolbar";
+
+        toolbar.innerHTML = `
+            <button onclick="changeSymbol(${i})">Sembol Uygula</button>
+            <button onclick="setIntervalTF(${i}, '1')">1m</button>
+            <button onclick="setIntervalTF(${i}, '5')">5m</button>
+            <button onclick="setIntervalTF(${i}, '15')">15m</button>
+            <button onclick="setIntervalTF(${i}, '60')">1H</button>
+            <button onclick="setIntervalTF(${i}, '240')">4H</button>
+            <button onclick="setIntervalTF(${i}, 'D')">1D</button>
+        `;
+
+        box.appendChild(toolbar);
+
+        const chartDiv = document.createElement("div");
+        chartDiv.id = "chart" + i;
+        chartDiv.style.height = "100%";
+        box.appendChild(chartDiv);
+
+        area.appendChild(box);
+
+        new TradingView.widget({
+            container_id: "chart" + i,
+            autosize: true,
+            symbol: "FX:EURUSD",
+            interval: "5",
+            timezone: "Europe/Istanbul",
+            theme: "dark",
+            style: "1",
+            locale: "tr",
+            hide_side_toolbar: false,
+            withdateranges: true,
         });
-        const cs=chart.addCandlestickSeries();
-        charts.push(chart);series.push(cs);
-        setupCanvas(document.getElementById("canvas"+i),i);
-    }
-    applyAll(); redrawAll();
-}
-
-async function applyAll(){
-    const sym=document.getElementById("symbolSelect").value;
-    const tf=document.getElementById("tfSelect").value;
-    for(let i=0;i<series.length;i++){
-        const r=await fetch(`https://api.binance.com/api/v3/klines?symbol=${sym}&interval=${tf}`);
-        const j=await r.json();
-        series[i].setData(j.map(c=>({time:c[0]/1000,open:+c[1],high:+c[2],low:+c[3],close:+c[4]})));
     }
 }
 
-/* ================== DRAW ================== */
-function setTool(t,b){
-    tool=t;
-    document.querySelectorAll("#toolbar button").forEach(x=>x.classList.remove("active"));
-    b.classList.add("active");
-    canvases.forEach(c=>c.classList.add("active"));
-}
-function exitDraw(){
-    tool=null;
-    canvases.forEach(c=>c.classList.remove("active"));
-    document.querySelectorAll("#toolbar button").forEach(x=>x.classList.remove("active"));
-}
-function clearDraw(){drawings=[];localStorage.setItem("drawings","[]");redrawAll();}
-
-function setupCanvas(c,i){
-    canvases[i]=c;
-    const ctx=c.getContext("2d");
-    c.width=c.offsetWidth;c.height=c.offsetHeight;
-    let start=null;
-    c.onmousedown=e=>{if(!tool)return;start={x:e.offsetX,y:e.offsetY};};
-    c.onmouseup=e=>{
-        if(!start)return;
-        drawings.push({chart:i,tool,x1:start.x,y1:start.y,x2:e.offsetX,y2:e.offsetY});
-        localStorage.setItem("drawings",JSON.stringify(drawings));
-        start=null;exitDraw();redrawAll();
-    };
-}
-
-function redrawAll(){
-    canvases.forEach((c,i)=>{
-        const ctx=c.getContext("2d");
-        ctx.clearRect(0,0,c.width,c.height);
-        ctx.strokeStyle="#f5c542";ctx.lineWidth=2;
-        drawings.filter(d=>d.chart===i).forEach(d=>{
-            ctx.beginPath();
-            if(d.tool==="trend"){ctx.moveTo(d.x1,d.y1);ctx.lineTo(d.x2,d.y2);}
-            if(d.tool==="hline"){ctx.moveTo(0,d.y2);ctx.lineTo(c.width,d.y2);}
-            if(d.tool==="vline"){ctx.moveTo(d.x2,0);ctx.lineTo(d.x2,c.height);}
-            if(d.tool==="rect"){ctx.strokeRect(Math.min(d.x1,d.x2),Math.min(d.y1,d.y2),Math.abs(d.x2-d.x1),Math.abs(d.y2-d.y1));}
-            ctx.stroke();
-        });
+function changeSymbol(i){
+    let sym = document.getElementById("pairSelect").value;
+    new TradingView.widget({
+        container_id: "chart" + i,
+        autosize: true,
+        symbol: sym,
+        interval: "5",
+        timezone: "Europe/Istanbul",
+        theme: "dark",
+        locale: "tr",
+        hide_side_toolbar: false,
     });
 }
 
-/* ================== ALARM ================== */
-function toggleAlarm(){
-    const b=document.getElementById("alarmBox");
-    b.style.display=b.style.display==="block"?"none":"block";
-    drawAlarmList();
+function setIntervalTF(i, tf){
+    let sym = document.getElementById("pairSelect").value;
+    new TradingView.widget({
+        container_id: "chart" + i,
+        autosize: true,
+        symbol: sym,
+        interval: tf,
+        timezone: "Europe/Istanbul",
+        theme: "dark",
+        locale: "tr",
+    });
 }
-function addAlarm(){
-    const p=parseFloat(document.getElementById("alarmPrice").value);
-    const d=document.getElementById("alarmDir").value;
-    const s=document.getElementById("symbolSelect").value;
-    if(!p)return;
-    alarms.push({symbol:s,price:p,dir:d});
-    localStorage.setItem("alarms",JSON.stringify(alarms));
-    drawAlarmList();
-}
-function drawAlarmList(){
-    document.getElementById("alarmList").innerHTML=
-        alarms.map((a,i)=>`<div class="alItem">${a.symbol} ${a.dir==="up"?"⬆":"⬇"} ${a.price}
-        <span onclick="delAlarm(${i})" style="color:red;cursor:pointer">X</span></div>`).join("");
-}
-function delAlarm(i){alarms.splice(i,1);localStorage.setItem("alarms",JSON.stringify(alarms));drawAlarmList();}
 
-setInterval(async ()=>{
-    for(let i=alarms.length-1;i>=0;i--){
-        const a=alarms[i];
-        const r=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${a.symbol}`);
-        const p=+(await r.json()).price;
-        if((a.dir==="up"&&p>=a.price)||(a.dir==="down"&&p<=a.price)){
-            alert(`${a.symbol} alarm tetiklendi!`);
-            alarms.splice(i,1);
-            localStorage.setItem("alarms",JSON.stringify(alarms));
-            drawAlarmList();
-        }
-    }
-},3000);
-
-/* INIT */
-loadSymbols();renderCharts();
+renderCharts();
 </script>
 
 </body>
