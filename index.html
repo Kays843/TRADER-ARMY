@@ -2,64 +2,71 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>TraderArmy PRO+</title>
+<title>TraderArmy Charts</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Lightweight Charts -->
-<script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+<script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
-body {
+body{
     margin:0;
-    background:#0f0f0f;
-    font-family:Arial;
-    color:white;
-    overflow:hidden;
+    background:#0e0e0e;
+    color:#fff;
+    font-family:Arial, sans-serif;
 }
-
-header {
+header{
     background:#111;
     padding:10px;
     display:flex;
     gap:10px;
-    border-bottom:1px solid #222;
     flex-wrap:wrap;
+    align-items:center;
+    border-bottom:1px solid #222;
 }
-
-button, select {
+button, select, input{
     background:#1a1a1a;
-    color:white;
+    color:#fff;
     border:1px solid #333;
-    padding:6px 8px;
+    padding:6px 10px;
     border-radius:4px;
 }
-
-#charts {
+#charts{
     display:grid;
-    height:calc(100vh - 160px);
+    height:calc(100vh - 200px);
 }
-
-.chart-box {
+.chart-box{
     border:1px solid #222;
-    position:relative;
+    display:flex;
+    flex-direction:column;
 }
-
-.toolbar {
+.toolbar{
     background:#111;
-    padding:5px;
+    padding:6px;
     border-bottom:1px solid #222;
     display:flex;
-    gap:5px;
-    flex-wrap:wrap;
+    gap:8px;
 }
-
-.draw-btn { background:#333; padding:6px; border-radius:4px; }
-
-footer {
+.chart{
+    flex:1;
+}
+.alarm-box{
+    background:#111;
+    padding:6px;
+    border-top:1px solid #222;
+    display:flex;
+    gap:6px;
+    align-items:center;
+}
+.alarm-list{
+    font-size:12px;
+    padding:6px;
+    border-top:1px solid #222;
+}
+footer{
     background:#111;
     color:#aaa;
-    padding:10px;
     text-align:center;
+    padding:12px;
     font-size:12px;
     border-top:1px solid #222;
 }
@@ -69,145 +76,205 @@ footer {
 <body>
 
 <header>
-    <strong>TraderArmy PRO+</strong>
+    <strong>TraderArmy</strong>
+
     <button onclick="setLayout(1)">1 Grafik</button>
     <button onclick="setLayout(2)">2 Grafik</button>
     <button onclick="setLayout(4)">4 Grafik</button>
 
-    <select id="symbolSelect">
-        <optgroup label="Forex">
-            <option value="ESCAPED:EURUSD">EURUSD</option>
-            <option value="ESCAPED:GBPUSD">GBPUSD</option>
-            <option value="ESCAPED:USDJPY">USDJPY</option>
-            <option value="ESCAPED:XAUUSD">XAUUSD</option>
-        </optgroup>
+    <select id="pairSelect">
+        <!-- Forex -->
+        <option value="FX:EURUSD">EURUSD</option>
+        <option value="FX:XAUUSD">XAUUSD</option>
+        <option value="FX:GBPUSD">GBPUSD</option>
+        <option value="FX:USDJPY">USDJPY</option>
+        <option value="FX:USDTRY">USDTRY</option>
 
-        <optgroup label="Kripto">
-            <option value="BINANCE:BTCUSDT">BTCUSDT</option>
-            <option value="BINANCE:ETHUSDT">ETHUSDT</option>
-            <option value="BINANCE:XRPUSDT">XRPUSDT</option>
-        </optgroup>
-
-        <optgroup label="Endeks">
-            <option value="INDEX:SPX">S&P 500</option>
-            <option value="INDEX:NSDQ">NASDAQ</option>
-        </optgroup>
+        <!-- Kripto -->
+        <option value="BINANCE:BTCUSDT">BTCUSDT</option>
+        <option value="BINANCE:ETHUSDT">ETHUSDT</option>
+        <option value="BINANCE:XRPUSDT">XRPUSDT</option>
     </select>
 
-    <button onclick="loadAllCharts()">Uygula</button>
+    <select id="tfSelect">
+        <option value="1">1m</option>
+        <option value="5">5m</option>
+        <option value="15">15m</option>
+        <option value="60">1H</option>
+        <option value="240">4H</option>
+        <option value="D">1D</option>
+    </select>
+
+    <button onclick="applyAll()">Uygula</button>
 </header>
 
 <div id="charts"></div>
 
 <footer>
-⚠️ Yasal Uyarı: Bu platform yatırım tavsiyesi değildir. Tüm finansal işlemler risk içerir.
+⚠️ <b>Yasal Uyarı:</b> Bu platformda yer alan grafikler, fiyatlar ve analizler yatırım tavsiyesi değildir.
+Finansal piyasalar yüksek risk içerir. Yapılan tüm işlemlerden kullanıcı sorumludur.
 </footer>
 
 <script>
 let layout = 1;
-let charts = [];
+let alarms = JSON.parse(localStorage.getItem("ta_alarms")) || [];
+let chartSymbols = [];
 
 function setLayout(n){
     layout = n;
-    renderCharts();
+    render();
 }
 
-function renderCharts(){
+function render(){
     const area = document.getElementById("charts");
     area.innerHTML = "";
 
-    if(layout === 1){
-        area.style.gridTemplateColumns = "1fr";
-        area.style.gridTemplateRows = "1fr";
+    if(layout===1){
+        area.style.gridTemplateColumns="1fr";
+        area.style.gridTemplateRows="1fr";
     }
-    if(layout === 2){
-        area.style.gridTemplateColumns = "1fr 1fr";
-        area.style.gridTemplateRows = "1fr";
+    if(layout===2){
+        area.style.gridTemplateColumns="1fr 1fr";
+        area.style.gridTemplateRows="1fr";
     }
-    if(layout === 4){
-        area.style.gridTemplateColumns = "1fr 1fr";
-        area.style.gridTemplateRows = "1fr 1fr";
+    if(layout===4){
+        area.style.gridTemplateColumns="1fr 1fr";
+        area.style.gridTemplateRows="1fr 1fr";
     }
 
-    charts = [];
+    chartSymbols = [];
 
     for(let i=0;i<layout;i++){
-        const box = document.createElement("div");
-        box.className = "chart-box";
-        box.id = "box"+i;
-        area.appendChild(box);
-
-        createChart(i);
+        createChartBox(i);
     }
 }
 
-function createChart(i){
-    const box = document.getElementById("box"+i);
+function createChartBox(i){
+    const area = document.getElementById("charts");
+    const box = document.createElement("div");
+    box.className="chart-box";
 
     const toolbar = document.createElement("div");
-    toolbar.className = "toolbar";
+    toolbar.className="toolbar";
     toolbar.innerHTML = `
-        <button class="draw-btn" onclick="startDraw(${i}, 'trend')">Trend</button>
-        <button class="draw-btn" onclick="startDraw(${i}, 'horizontal')">H-Line</button>
-        <button class="draw-btn" onclick="startDraw(${i}, 'fib')">Fib</button>
-        <button class="draw-btn" onclick="startDraw(${i}, 'rect')">Kutu</button>
-        <button class="draw-btn" onclick="startDraw(${i}, 'brush')">Fırça</button>
-        <button class="draw-btn" onclick="startDraw(${i}, 'long')">Long</button>
-        <button class="draw-btn" onclick="startDraw(${i}, 'short')">Short</button>
-        <button class="draw-btn" onclick="clearDraw(${i})">Temizle</button>
+        <select onchange="changeSymbol(${i}, this.value)">
+            ${document.getElementById("pairSelect").innerHTML}
+        </select>
+        <select onchange="changeTf(${i}, this.value)">
+            ${document.getElementById("tfSelect").innerHTML}
+        </select>
     `;
+
+    const chart = document.createElement("div");
+    chart.className="chart";
+    chart.id = "tv"+i;
+
+    const alarmBox = document.createElement("div");
+    alarmBox.className="alarm-box";
+    alarmBox.innerHTML = `
+        <input id="alPrice${i}" placeholder="Alarm fiyatı" style="width:90px">
+        <button onclick="addAlarm(${i})">Alarm +</button>
+    `;
+
+    const alarmList = document.createElement("div");
+    alarmList.className="alarm-list";
+    alarmList.id = "alarmList"+i;
+
     box.appendChild(toolbar);
+    box.appendChild(chart);
+    box.appendChild(alarmBox);
+    box.appendChild(alarmList);
+    area.appendChild(box);
 
-    const div = document.createElement("div");
-    div.style.height = "100%";
-    div.style.width = "100%";
-    div.id = "chart"+i;
-    box.appendChild(div);
-
-    const chart = LightweightCharts.createChart(div,{
-        layout:{background:{color:"#0f0f0f"}, textColor:"white"},
-        grid:{vertLines:{color:"#222"}, horzLines:{color:"#222"}},
-        rightPriceScale:{borderColor:"#333"},
-        timeScale:{borderColor:"#333"}
-    });
-
-    charts.push(chart);
-
-    loadSymbol(i);
+    createTV(i);
+    updateAlarmList(i);
 }
 
-function loadSymbol(i){
-    const symbol = document.getElementById("symbolSelect").value;
-    const price = charts[i].addCandlestickSeries();
+function createTV(i){
+    const symbol = document.getElementById("pairSelect").value;
+    const interval = document.getElementById("tfSelect").value;
+    chartSymbols[i] = symbol;
 
-    fetch("https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h")
-    .then(r=>r.json())
-    .then(d=>{
-        const data = d.map(k=>({
-            time:Math.floor(k[0]/1000),
-            open:k[1],
-            high:k[2],
-            low:k[3],
-            close:k[4]
-        }));
-        price.setData(data);
+    new TradingView.widget({
+        container_id: "tv"+i,
+        autosize: true,
+        symbol: symbol,
+        interval: interval,
+        timezone: "Europe/Istanbul",
+        theme: "dark",
+        style: "1",
+        locale: "tr",
+        hide_side_toolbar:false,
+        withdateranges:true
     });
 }
 
-function loadAllCharts(){
-    for(let i=0;i<layout;i++){
-        loadSymbol(i);
+function changeSymbol(i,val){
+    chartSymbols[i] = val;
+    render();
+}
+function changeTf(i,val){
+    render();
+}
+function applyAll(){
+    render();
+}
+
+// -------- ALARM SİSTEMİ --------
+
+function addAlarm(i){
+    const sym = chartSymbols[i];
+    const price = parseFloat(document.getElementById("alPrice"+i).value);
+    if(!price){ alert("Fiyat gir"); return; }
+
+    alarms.push({sym, price});
+    localStorage.setItem("ta_alarms", JSON.stringify(alarms));
+    updateAlarmList(i);
+}
+
+function updateAlarmList(i){
+    const list = alarms.filter(a=>a.sym===chartSymbols[i]);
+    document.getElementById("alarmList"+i).innerHTML =
+        list.map(a=>`<div>${a.sym} → ${a.price}</div>`).join("");
+}
+
+async function checkAlarms(){
+    for(const a of alarms){
+
+        // KRİPTO
+        if(a.sym.startsWith("BINANCE:")){
+            const s = a.sym.replace("BINANCE:","");
+            const r = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${s}`);
+            const d = await r.json();
+            if(parseFloat(d.price) >= a.price){
+                triggerAlarm(a);
+            }
+        }
+
+        // FOREX
+        if(a.sym.startsWith("FX:")){
+            const pair = a.sym.replace("FX:","");
+            const base = pair.substring(0,3);
+            const quote = pair.substring(3,6);
+            const r = await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${quote}`);
+            const d = await r.json();
+            const price = d.rates[quote];
+            if(price >= a.price){
+                triggerAlarm(a);
+            }
+        }
     }
 }
 
-function startDraw(i,type){
-    alert("Çizim aktif: " + type + "\n(bu versiyonda demo uyarısı)");
-}
-function clearDraw(i){
-    alert("Çizimler temizlendi");
+function triggerAlarm(a){
+    alert("ALARM! " + a.sym + " → " + a.price);
+    const audio = new Audio("https://actions.google.com/sounds/v1/alarms/beep_short.ogg");
+    audio.play();
 }
 
-renderCharts();
+setInterval(checkAlarms, 5000);
+
+render();
 </script>
 
 </body>
