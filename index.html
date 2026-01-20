@@ -3,97 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TRADE ARMY V1 | PRO TERMINAL</title>
+    <title>TRADE ARMY V1 | SELECTABLE GRID</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #08090d; color: #d1d4dc; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        body { background: #000; color: #d1d4dc; font-family: sans-serif; overflow: hidden; height: 100vh; margin: 0; display: flex; flex-direction: column; }
         .header { height: 50px; background: #131722; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; shrink-0; }
-        .main-container { flex: 1; display: flex; overflow: hidden; }
-        .side-bar { width: 60px; background: #0c0d10; border-right: 1px solid #1e222d; display: flex; flex-direction: column; shrink-0; }
-        .side-btn { padding: 12px 0; text-align: center; font-size: 10px; font-weight: 900; border-bottom: 1px solid #1e222d; cursor: pointer; transition: 0.2s; }
-        .side-btn:hover { background: #2962ff; color: white; }
-        .chart-area { flex: 1; background: #000; position: relative; }
-        /* FOOSTER - YASAL UYARI STİLİ */
-        .footer-fixed { height: 35px; background: #0c0d10; border-top: 1px solid #2a2e39; display: flex; align-items: center; justify-content: center; px-4; shrink-0; z-index: 100; }
-        .footer-text { font-size: 10px; color: #5d606b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .warning-tag { color: #facc15; font-weight: bold; margin-right: 8px; }
-        #alarm-panel { width: 280px; background: #131722; border-left: 1px solid #2a2e39; display: none; padding: 15px; overflow-y: auto; }
+        .main-content { flex: 1; position: relative; background: #1e222d; overflow: hidden; }
+        
+        /* DİNAMİK GRID YAPISI */
+        #chart-grid { display: grid; height: 100%; width: 100%; gap: 1px; }
+        .grid-1 { grid-template-columns: 1fr; }
+        .grid-2 { grid-template-columns: 1fr 1fr; }
+        .grid-3 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; } /* 3'lüde 4. slot boş kalır veya 1 büyük 2 küçük yapılır */
+        .grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+
+        .chart-box { background: #000; width: 100%; height: 100%; }
+        .btn-layout { background: #1e222d; color: #5d606b; padding: 4px 10px; border-radius: 4px; font-weight: bold; font-size: 12px; transition: 0.2s; border: 1px solid #2a2e39; }
+        .btn-layout:hover, .active-layout { background: #2962ff; color: white; border-color: #2962ff; }
+        
+        .footer-fixed { height: 30px; background: #0c0d10; border-top: 1px solid #2a2e39; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #5d606b; shrink-0; }
     </style>
 </head>
-<body onclick="initAudio()">
+<body>
 
     <header class="header">
         <div class="flex items-center space-x-3">
-            <h1 class="text-white font-black italic tracking-tighter text-lg">TRADE ARMY <span class="text-blue-500">V1</span></h1>
-            <button onclick="window.open('https://www.tradingview.com/accounts/signin/', '_blank')" class="bg-[#2962ff] text-white text-[9px] px-3 py-1.5 rounded font-bold uppercase hover:shadow-[0_0_10px_#2962ff] transition">
-                HESABA GİRİŞ YAP
-            </button>
-            <button onclick="location.reload()" class="bg-gray-800 text-gray-300 text-[9px] px-3 py-1.5 rounded font-bold border border-white/10">
-                SİSTEMİ YENİLE
-            </button>
+            <h1 class="text-white font-black italic tracking-tighter text-lg uppercase">Trade Army <span class="text-blue-500">V1</span></h1>
+            <button onclick="window.open('https://www.tradingview.com/accounts/signin/', '_blank')" class="bg-blue-600 text-white text-[10px] px-3 py-1.5 rounded font-bold uppercase">1. HESABA GİRİŞ YAP</button>
+            <button onclick="location.reload()" class="bg-gray-800 text-gray-300 text-[10px] px-3 py-1.5 rounded font-bold border border-white/10">2. YENİLE</button>
         </div>
-        <div class="flex items-center space-x-3">
-            <div class="bg-black/50 p-1 rounded border border-white/5 flex space-x-1">
-                <button onclick="setGrid(1)" class="px-3 py-1 text-xs font-bold text-gray-400 hover:text-white">1</button>
-                <button onclick="setGrid(2)" class="px-3 py-1 text-xs font-bold text-gray-400 hover:text-white">2</button>
-                <button onclick="setGrid(4)" class="px-3 py-1 text-xs font-bold text-gray-400 hover:text-white">4</button>
-            </div>
-            <button onclick="toggleAlarm()" class="bg-orange-600 text-white text-[9px] font-bold px-3 py-1.5 rounded uppercase">ALARM ☰</button>
+
+        <div class="flex items-center space-x-2 bg-black/40 p-1 rounded border border-white/5">
+            <span class="text-[9px] text-gray-500 font-bold mr-2 uppercase">Ekran Sayısı:</span>
+            <button onclick="updateLayout(1, this)" class="btn-layout active-layout">1</button>
+            <button onclick="updateLayout(2, this)" class="btn-layout">2</button>
+            <button onclick="updateLayout(3, this)" class="btn-layout">3</button>
+            <button onclick="updateLayout(4, this)" class="btn-layout">4</button>
         </div>
     </header>
 
-    <div class="main-container">
-        <aside class="side-bar">
-            <div class="side-btn text-blue-400" onclick="changeSym('CAPITALCOM:US100')">NAS<br>CFD</div>
-            <div class="side-btn text-yellow-500" onclick="changeSym('TVC:GOLD')">XAU<br>USD</div>
-            <div class="side-btn text-gray-400" onclick="changeSym('TVC:SILVER')">XAG<br>USD</div>
-            <div class="side-btn text-green-500" onclick="changeSym('FX:EURUSD')">EUR<br>USD</div>
-            <div class="side-btn text-orange-500" onclick="changeSym('BINANCE:BTCUSDT')">BTC<br>USDT</div>
-        </aside>
-
-        <main id="grid-container" class="chart-area grid grid-cols-1 h-full w-full">
-            <div id="tv_chart_1" class="w-full h-full border-r border-b border-white/5"></div>
-            <div id="tv_chart_2" class="w-full h-full hidden border-b border-white/5"></div>
-            <div id="tv_chart_3" class="w-full h-full hidden border-r border-white/5"></div>
-            <div id="tv_chart_4" class="w-full h-full hidden"></div>
-        </main>
-
-        <aside id="alarm-panel">
-            <h2 class="text-orange-500 font-bold text-xs mb-4 uppercase text-center tracking-widest">Sınırsız Alarm</h2>
-            <input type="text" id="asym" placeholder="Sembol" class="w-full bg-black border border-gray-800 p-2 text-xs mb-2 rounded text-blue-400 font-bold outline-none">
-            <input type="number" id="aprice" placeholder="Fiyat" class="w-full bg-black border border-gray-800 p-2 text-xs mb-4 rounded text-yellow-500 font-bold outline-none">
-            <button onclick="addAlarm()" class="w-full bg-orange-600 text-white font-bold py-2 rounded text-xs mb-4 uppercase">Alarm Ekle</button>
-            <div id="list" class="space-y-2"></div>
-        </aside>
-    </div>
+    <main class="main-content">
+        <div id="chart-grid" class="grid-1">
+            <div id="box_1" class="chart-box"></div>
+            <div id="box_2" class="chart-box hidden"></div>
+            <div id="box_3" class="chart-box hidden"></div>
+            <div id="box_4" class="chart-box hidden"></div>
+        </div>
+    </main>
 
     <footer class="footer-fixed">
-        <div class="footer-text">
-            <span class="warning-tag">YASAL UYARI:</span> 
-            Burada yer alan yatırım bilgi, yorum ve tavsiyeleri yatırım danışmanlığı kapsamında değildir. Bu bilgiler mali durumunuz ile risk ve getiri tercihlerinize uygun olmayabilir.
-            <span class="ml-4 opacity-50">| Trade Army V1 Terminal &copy; 2026</span>
-        </div>
+        <span class="text-yellow-600 font-bold mr-2">YASAL UYARI:</span> Yatırım tavsiyesi değildir. Senkronizasyon için Bulut simgesini kullanın.
     </footer>
 
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
-        let symbol = 'CAPITALCOM:US100';
-        let layout = 1;
-        let alarms = JSON.parse(localStorage.getItem('army_alarms_v2')) || [];
-        let audio = false;
+        let currentSymbol = 'CAPITALCOM:US100';
+        let currentLayout = 1;
 
-        function initAudio() { audio = true; }
-
-        function createWidget(id, sym) {
+        function initChart(id, sym) {
             new TradingView.widget({
                 "autosize": true,
                 "symbol": sym,
-                "interval": "60",
+                "interval": "1",
                 "theme": "dark",
                 "style": "1",
                 "locale": "tr",
                 "toolbar_bg": "#131722",
-                "enable_publishing": true,
                 "hide_side_toolbar": false,
                 "allow_symbol_change": true,
                 "container_id": id,
@@ -104,60 +79,45 @@
                 "charts_storage_api_version": "1.1",
                 "client_id": "tradingview.com",
                 "user_id": "public_user_id",
-                "enabled_features": ["header_saveload", "header_resolutions", "header_settings", "header_indicators", "header_undo_redo", "auto_save_and_load_chart"]
+                "enabled_features": [
+                    "header_saveload", 
+                    "auto_save_and_load_chart",
+                    "header_resolutions",
+                    "header_settings",
+                    "header_indicators",
+                    "header_undo_redo"
+                ]
             });
         }
 
-        function setGrid(n) {
-            layout = n;
-            const container = document.getElementById('grid-container');
-            container.className = `chart-area grid h-full w-full ${n===1 ? 'grid-cols-1' : n===2 ? 'grid-cols-2' : 'grid-cols-2 grid-rows-2'}`;
+        function updateLayout(n, btn) {
+            currentLayout = n;
+            const grid = document.getElementById('chart-grid');
+            
+            // Buton Stilini Güncelle
+            document.querySelectorAll('.btn-layout').forEach(b => b.classList.remove('active-layout'));
+            if(btn) btn.classList.add('active-layout');
+
+            // Grid Sınıfını Güncelle
+            grid.className = `grid-${n}`;
+
+            // Chartları Yönet
             for(let i=1; i<=4; i++) {
-                const el = document.getElementById('tv_chart_'+i);
-                if(i <= n) { el.classList.remove('hidden'); createWidget('tv_chart_'+i, symbol); }
-                else { el.classList.add('hidden'); el.innerHTML = ''; }
+                const box = document.getElementById(`box_${i}`);
+                if(i <= n) {
+                    box.classList.remove('hidden');
+                    initChart(`box_${i}`, currentSymbol);
+                } else {
+                    box.classList.add('hidden');
+                    box.innerHTML = ""; // Kaynak tüketimini önlemek için temizle
+                }
             }
         }
 
-        function changeSym(s) {
-            symbol = s;
-            document.getElementById('asym').value = s;
-            for(let i=1; i<=layout; i++) {
-                if(!document.getElementById('tv_chart_'+i).classList.contains('hidden')) createWidget('tv_chart_'+i, s);
-            }
-        }
-
-        function toggleAlarm() { 
-            const p = document.getElementById('alarm-panel');
-            p.style.display = p.style.display === 'block' ? 'none' : 'block';
-        }
-
-        function addAlarm() {
-            let s = document.getElementById('asym').value.toUpperCase() || symbol;
-            let p = document.getElementById('aprice').value;
-            if(!p) return;
-            alarms.push({id: Date.now(), s, p});
-            localStorage.setItem('army_alarms_v2', JSON.stringify(alarms));
-            renderAlarms();
-            if(audio) { let msg = new SpeechSynthesisUtterance(s + " alarmı kuruldu"); msg.lang='tr-TR'; window.speechSynthesis.speak(msg); }
-        }
-
-        function renderAlarms() {
-            document.getElementById('list').innerHTML = alarms.map(a => `
-                <div class="flex justify-between items-center bg-white/5 p-2 rounded text-[10px]">
-                    <span class="text-white">${a.s} @ <span class="text-orange-400 font-bold">${a.p}</span></span>
-                    <button onclick="removeAlarm(${a.id})" class="text-red-500 font-bold px-2">SİL</button>
-                </div>
-            `).join('');
-        }
-
-        function removeAlarm(id) {
-            alarms = alarms.filter(a => a.id !== id);
-            localStorage.setItem('army_alarms_v2', JSON.stringify(alarms));
-            renderAlarms();
-        }
-
-        window.onload = () => { setGrid(1); renderAlarms(); };
+        // İlk açılışta 1'li ekranı yükle
+        window.onload = () => {
+            updateLayout(1);
+        };
     </script>
 </body>
 </html>
