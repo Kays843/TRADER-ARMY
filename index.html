@@ -33,13 +33,11 @@
 
     <header class="h-16 border-b border-[#1e222d] bg-[#131722] flex items-center justify-between px-4 shrink-0 z-50">
         <div class="flex items-center space-x-4">
-            <img src="https://via.placeholder.com/40x40/2962ff/ffffff?text=TA" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
-            
+            <img src="BURAYA_LOGO_URL" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
             <div class="flex flex-col leading-tight">
                 <span class="text-white font-black italic text-lg tracking-tighter uppercase">TRADE ARMY</span>
                 <span class="text-blue-500 text-[10px] font-bold tracking-[3px] ml-1">V.1</span>
             </div>
-
             <div class="flex space-x-1 bg-black/20 p-1 rounded border border-gray-800 ml-4">
                 <button onclick="changeLayout(1, this)" class="control-btn active-layout">1</button>
                 <button onclick="changeLayout(2, this)" class="control-btn">2</button>
@@ -47,19 +45,30 @@
             </div>
         </div>
 
-        <div id="active-symbol-text" class="hidden md:block text-[11px] font-mono text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 uppercase tracking-widest">NASDAQ:IXIC</div>
+        <div class="flex items-center space-x-4">
+            <div id="live-clock" class="text-right">
+                <div class="text-white font-mono text-sm font-bold leading-none" id="clock-time">00:00:00</div>
+                <div class="text-[9px] text-green-500 font-bold tracking-widest uppercase" id="market-status">Piyasalar Açık</div>
+            </div>
+            <div id="active-symbol-text" class="hidden md:block text-[11px] font-mono text-blue-500 bg-blue-500/10 px-3 py-1 rounded-full border border-blue-500/20 uppercase tracking-widest">NASDAQ:IXIC</div>
+        </div>
     </header>
 
     <div class="flex flex-1 overflow-hidden relative">
-        <aside class="w-14 border-r border-[#1e222d] bg-[#0c0d10] flex flex-col items-center py-4 space-y-4 shrink-0 overflow-y-auto">
-            <button onclick="updateSymbol('NASDAQ:IXIC')" title="Nasdaq" class="icon-btn">📈</button>
-            <button onclick="updateSymbol('FX:EURUSD')" title="EUR/USD" class="icon-btn">🇪🇺</button>
-            <button onclick="updateSymbol('BINANCE:BTCUSDT')" title="BTC" class="icon-btn">₿</button>
-            <button onclick="updateSymbol('TVC:GOLD')" title="Altın" class="icon-btn">🟡</button>
+        <aside class="w-14 border-r border-[#1e222d] bg-[#0c0d10] flex flex-col items-center py-4 space-y-4 shrink-0 justify-between">
+            <div class="flex flex-col space-y-4 items-center w-full">
+                <button onclick="updateSymbol('NASDAQ:IXIC')" title="Nasdaq" class="icon-btn">📈</button>
+                <button onclick="updateSymbol('FX:EURUSD')" title="EUR/USD" class="icon-btn">🇪🇺</button>
+                <button onclick="updateSymbol('BINANCE:BTCUSDT')" title="BTC" class="icon-btn">₿</button>
+                <button onclick="updateSymbol('TVC:GOLD')" title="Altın" class="icon-btn">🟡</button>
+            </div>
+            <div class="mb-4">
+                <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="Fear & Greed" class="w-10 h-10 rounded border border-gray-800 opacity-60 hover:opacity-100 transition-opacity cursor-pointer" onclick="window.open('https://alternative.me/crypto/fear-and-greed-index/', '_blank')">
+            </div>
         </aside>
 
-        <main class="flex-1 relative overflow-hidden bg-black">
-            <div id="chart-grid" class="grid-1">
+        <main class="flex-1 flex flex-col relative overflow-hidden bg-black">
+            <div id="chart-grid" class="flex-1 grid-1">
                 <div id="tv_1" class="w-full h-full"></div>
                 <div id="tv_2" class="w-full h-full hidden"></div>
                 <div id="tv_3" class="w-full h-full hidden"></div>
@@ -69,42 +78,34 @@
 
         <aside class="side-panel shrink-0">
             <div class="h-1/2 flex flex-col border-b border-[#1e222d]">
-                <div class="panel-header">
-                    <span>📅 Ekonomik Takvim</span>
-                    <span class="text-blue-500 text-[8px]">CANLI</span>
-                </div>
+                <div class="panel-header"><span>📅 Ekonomik Takvim</span></div>
                 <div class="flex-1">
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-events.js" async>
-                    { "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%", "locale": "tr", "importanceFilter": "0,1", "currencyFilter": "USD,EUR,TRY" }
+                    { "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%", "locale": "tr", "importanceFilter": "0,1" }
                     </script>
                 </div>
             </div>
-
             <div class="h-1/2 flex flex-col">
-                <div class="panel-header">
-                    <span>🔥 Önemli Haberler</span>
-                </div>
+                <div class="panel-header"><span>🔥 Önemli Haberler</span></div>
                 <div class="flex-1">
                     <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
-                    { "feedMode": "all_symbols", "colorTheme": "dark", "isTransparent": true, "displayMode": "regular", "width": "100%", "height": "100%", "locale": "tr" }
+                    { "feedMode": "all_symbols", "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%", "locale": "tr" }
                     </script>
                 </div>
             </div>
         </aside>
     </div>
 
-    <footer class="h-10 bg-black border-t border-gray-900 flex items-center justify-between px-6 text-[9px] text-gray-500 shrink-0">
-        <div>TRADE ARMY <span class="text-blue-500 font-bold ml-1">V.1</span></div>
-        <div class="flex items-center space-x-2">
-            <span class="text-red-900 font-bold uppercase tracking-tighter">Uyarı:</span>
-            <span>Finansal veriler gecikmeli olabilir. Yatırım tavsiyesi değildir.</span>
-        </div>
-    </footer>
-
     <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
     <script>
         let currentSymbol = 'NASDAQ:IXIC';
         let currentCount = 1;
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock-time').innerText = now.toLocaleTimeString('tr-TR', { hour12: false });
+        }
+        setInterval(updateClock, 1000);
 
         function initChart(id, symbol) {
             new TradingView.widget({
@@ -118,7 +119,7 @@
 
         function changeLayout(count, btn) {
             currentCount = count;
-            document.getElementById('chart-grid').className = `grid-${count}`;
+            document.getElementById('chart-grid').className = `flex-1 grid-${count}`;
             document.querySelectorAll('.control-btn').forEach(b => b.classList.remove('active-layout'));
             if(btn) btn.classList.add('active-layout');
             for (let i = 1; i <= 4; i++) {
@@ -134,7 +135,10 @@
             for (let i = 1; i <= currentCount; i++) initChart(`tv_${i}`, s);
         }
 
-        window.onload = () => initChart('tv_1', currentSymbol);
+        window.onload = () => {
+            initChart('tv_1', currentSymbol);
+            updateClock();
+        };
     </script>
 </body>
 </html>
