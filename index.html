@@ -2,25 +2,34 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<title>TraderArmy Charts Pro</title>
+<title>TraderArmy Pro</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
 html,body{margin:0;padding:0;height:100%;background:#0e0e0e;color:#fff;font-family:Arial}
 header{background:#111;padding:10px;display:flex;gap:10px;border-bottom:1px solid #222}
-select,button,input{background:#1c1c1c;color:#fff;border:1px solid #333;padding:6px;border-radius:4px}
+button,select{background:#1c1c1c;color:#fff;border:1px solid #333;padding:6px;border-radius:4px}
 button{cursor:pointer}
 #charts{display:grid;height:calc(100vh - 140px)}
-.chart-box{border:1px solid #222;display:flex;flex-direction:column}
-.chart-toolbar{padding:5px;display:flex;gap:5px;align-items:center;background:#111;border-bottom:1px solid #222}
+.chart-box{border:1px solid #222;position:relative;display:flex;flex-direction:column}
 .chart{flex:1}
-.star{cursor:pointer;font-size:16px}
-.star.active{color:#f5c542}
 footer{background:#111;color:#aaa;font-size:12px;padding:8px;text-align:center;border-top:1px solid #222}
 
-/* alarm */
-#alarmBtn{position:fixed;right:15px;bottom:15px;background:#2962ff;border:none;padding:10px 15px;border-radius:6px;font-weight:bold}
-#alarmBox{position:fixed;right:15px;bottom:60px;background:#111;border:1px solid #333;padding:10px;width:280px;display:none;border-radius:6px}
-.alItem{font-size:11px;border-bottom:1px solid #222;padding:4px;display:flex;justify-content:space-between}
+/* DRAW TOOLBAR */
+#drawToolbar{
+ position:fixed;top:70px;left:10px;
+ background:#111;border:1px solid #333;
+ padding:6px;border-radius:6px;
+ display:flex;flex-direction:column;gap:5px;
+ z-index:9999
+}
+#drawToolbar button.active{background:#2962ff}
+
+/* CANVAS */
+.drawLayer{
+ position:absolute;top:0;left:0;
+ width:100%;height:100%;
+ z-index:50;
+}
 </style>
 </head>
 
@@ -33,177 +42,143 @@ footer{background:#111;color:#aaa;font-size:12px;padding:8px;text-align:center;b
 <button onclick="setLayout(4)">4 Grafik</button>
 </header>
 
-<div id="charts"></div>
-
-<!-- ALARM -->
-<div id="alarmBox">
-<strong>Alarm</strong><br><br>
-<input id="alSymbol" placeholder="FXCM:NAS100"><br><br>
-<input id="alPrice" type="number" placeholder="Hedef fiyat"><br><br>
-<select id="alDir">
-  <option value="up">⬆ Üzerine çıkınca</option>
-  <option value="down">⬇ Altına düşünce</option>
-</select><br><br>
-<button onclick="addAlarm()">Alarm Ekle</button>
-<div id="alarmList"></div>
+<div id="drawToolbar">
+<button onclick="setTool('trend')">📈 Trend</button>
+<button onclick="setTool('hline')">➖ Yatay</button>
+<button onclick="setTool('rect')">⬜ Zone</button>
+<button onclick="clearDraw()">🗑️ Sil</button>
 </div>
-<button id="alarmBtn" onclick="toggleAlarm()">🔔 ALARM</button>
+
+<div id="charts"></div>
 
 <footer>⚠️ Yatırım tavsiyesi değildir.</footer>
 
 <script src="https://s3.tradingview.com/tv.js"></script>
 <script>
-// ================= FAVORİLER =================
-let favorites = JSON.parse(localStorage.getItem("favorites")||"[]");
-function toggleFav(sym){
- favorites = favorites.includes(sym)
-   ? favorites.filter(x=>x!==sym)
-   : [...favorites, sym];
- localStorage.setItem("favorites",JSON.stringify(favorites));
+/* ================= GRAFİK ================= */
+let layout = localStorage.getItem("layout") || 1;
+
+const symbols = [
+ "FOREXCOM:NAS100",
+ "FOREXCOM:SPX500",
+ "FOREXCOM:US30",
+ "FOREXCOM:GER40",
+ "FOREXCOM:EURUSD",
+ "FOREXCOM:GBPUSD",
+ "FOREXCOM:USDJPY",
+ "BINANCE:BTCUSDT",
+ "BINANCE:ETHUSDT"
+];
+
+const intervals = ["1","5","15","60","240","D"];
+
+function setLayout(n){
+ layout=n;
+ localStorage.setItem("layout",n);
  render();
 }
 
-// ================= GRAFİK =================
-let layout=localStorage.getItem("layout")||1;
-const baseSymbols=[
- "FXCM:NAS100","FXCM:SPX500","FXCM:GER40","FXCM:US30",
- "FXCM:EURUSD","FXCM:GBPUSD","FXCM:USDJPY",
- "BINANCE:BTCUSDT","BINANCE:ETHUSDT"
-];
-const intervals=["1","5","15","60","240","D"];
-let tvWidgets=[];
-
-function allSymbols(){
- return [...favorites,...baseSymbols.filter(x=>!favorites.includes(x))];
-}
-
-function chartControls(i){
- const syms=allSymbols();
- const s=localStorage.getItem("symbol"+i)||syms[0];
- const t=localStorage.getItem("interval"+i)||"5";
- return `<div class="chart-toolbar">
- <span class="star ${favorites.includes(s)?"active":""}" onclick="toggleFav('${s}')">★</span>
- <select onchange="changeSymbol(${i},this.value)">
- ${syms.map(x=>`<option ${x==s?"selected":""}>${x}</option>`).join("")}
- </select>
- <select onchange="changeInterval(${i},this.value)">
- ${intervals.map(x=>`<option ${x==t?"selected":""}>${x}</option>`).join("")}
- </select></div>`;
-}
-
 function render(){
- tvWidgets=[];
- const c=document.getElementById("charts");c.innerHTML="";
- if(layout==1)c.style.gridTemplateColumns="1fr";
- if(layout==2)c.style.gridTemplateColumns="1fr 1fr";
- if(layout==4)c.style.gridTemplateColumns="1fr 1fr";
+ const c=document.getElementById("charts");
+ c.innerHTML="";
+ c.style.gridTemplateColumns = layout==1?"1fr":layout==2?"1fr 1fr":"1fr 1fr";
+
  for(let i=0;i<layout;i++){
-  const b=document.createElement("div");
-  b.className="chart-box";
-  b.innerHTML=chartControls(i)+`<div id="chart${i}" class="chart"></div>`;
-  c.appendChild(b);
-  const widget = new TradingView.widget({
+  const box=document.createElement("div");
+  box.className="chart-box";
+  box.innerHTML=`
+   <select onchange="changeSymbol(${i},this.value)">
+    ${symbols.map(s=>`<option ${localStorage.getItem("symbol"+i)==s?"selected":""}>${s}</option>`).join("")}
+   </select>
+   <select onchange="changeInterval(${i},this.value)">
+    ${intervals.map(t=>`<option ${localStorage.getItem("interval"+i)==t?"selected":""}>${t}</option>`).join("")}
+   </select>
+   <div id="chart${i}" class="chart"></div>
+   <canvas class="drawLayer"></canvas>
+  `;
+  c.appendChild(box);
+
+  new TradingView.widget({
    container_id:"chart"+i,
    autosize:true,
-   symbol:localStorage.getItem("symbol"+i)||allSymbols()[0],
+   symbol:localStorage.getItem("symbol"+i)||symbols[i],
    interval:localStorage.getItem("interval"+i)||"5",
-   theme:"dark",locale:"tr",
-   onChartReady(){
-     redrawAlarmLines();
-   }
+   theme:"dark",
+   locale:"tr"
   });
-  tvWidgets.push(widget);
+
+  initCanvas(box.querySelector(".drawLayer"));
  }
 }
-function setLayout(n){layout=n;localStorage.setItem("layout",n);render()}
+
 function changeSymbol(i,v){localStorage.setItem("symbol"+i,v);render()}
 function changeInterval(i,v){localStorage.setItem("interval"+i,v);render()}
 render();
 
-// ================= ALARM =================
-let alarms=JSON.parse(localStorage.getItem("alarms")||"[]");
+/* ================= ÇİZİM MOTORU ================= */
+let tool="trend",drawing=false,start={},objects=JSON.parse(localStorage.getItem("draws")||"[]");
 
-function toggleAlarm(){
- const b=document.getElementById("alarmBox");
- b.style.display=b.style.display==="block"?"none":"block";
+function setTool(t){
+ tool=t;
+ document.querySelectorAll("#drawToolbar button").forEach(b=>b.classList.remove("active"));
+ event.target.classList.add("active");
 }
 
-function addAlarm(){
- const s=document.getElementById("alSymbol").value.toUpperCase();
- const p=Number(document.getElementById("alPrice").value);
- const d=document.getElementById("alDir").value;
- if(!s||!p) return;
- alarms.push({s,p,d});
- localStorage.setItem("alarms",JSON.stringify(alarms));
- drawAlarms();
- redrawAlarmLines();
- Notification.requestPermission();
+function clearDraw(){
+ objects=[];
+ localStorage.setItem("draws","[]");
+ redrawAll();
 }
 
-function drawAlarms(){
- const l=document.getElementById("alarmList");
- l.innerHTML=alarms.map((a,i)=>`
- <div class="alItem">${a.s} ${a.d=="up"?"⬆":"⬇"} ${a.p}
- <span style="color:red;cursor:pointer" onclick="delAlarm(${i})">X</span>
- </div>`).join("");
-}
-function delAlarm(i){
- alarms.splice(i,1);
- localStorage.setItem("alarms",JSON.stringify(alarms));
- drawAlarms();
- redrawAlarmLines();
-}
-drawAlarms();
+function initCanvas(canvas){
+ const ctx=canvas.getContext("2d");
 
-// ===== ALARM ÇİZGİLERİ =====
-function redrawAlarmLines(){
- tvWidgets.forEach(w=>{
-  if(!w.chart) return;
-  w.chart().removeAllShapes();
-  alarms.forEach(a=>{
-   w.chart().createShape(
-     {price:a.p},
-     {
-      shape:"horizontal_line",
-      text:`ALARM ${a.p}`,
-      color:a.d=="up"?"#00ff88":"#ff4444",
-      linewidth:2
-     }
-   );
-  });
+ function resize(){
+  canvas.width=canvas.offsetWidth;
+  canvas.height=canvas.offsetHeight;
+  redraw(ctx,canvas);
+ }
+ window.addEventListener("resize",resize);
+ resize();
+
+ canvas.onmousedown=e=>{
+  drawing=true;
+  start={x:e.offsetX,y:e.offsetY};
+ };
+ canvas.onmouseup=e=>{
+  if(!drawing) return;
+  drawing=false;
+  objects.push({tool,x1:start.x,y1:start.y,x2:e.offsetX,y2:e.offsetY});
+  localStorage.setItem("draws",JSON.stringify(objects));
+  redraw(ctx,canvas);
+ };
+}
+
+function redraw(ctx,canvas){
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.strokeStyle="#f5c542";
+ ctx.lineWidth=2;
+
+ objects.forEach(o=>{
+  ctx.beginPath();
+  if(o.tool=="hline"){
+   ctx.moveTo(0,o.y2);
+   ctx.lineTo(canvas.width,o.y2);
+  }else if(o.tool=="rect"){
+   ctx.strokeRect(o.x1,o.y1,o.x2-o.x1,o.y2-o.y1);
+  }else{
+   ctx.moveTo(o.x1,o.y1);
+   ctx.lineTo(o.x2,o.y2);
+  }
+  ctx.stroke();
  });
 }
 
-// ===== FİYAT KONTROL =====
-async function getPrice(sym){
- if(sym.startsWith("BINANCE:")){
-  const p=sym.replace("BINANCE:","");
-  const r=await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${p}`);
-  return Number((await r.json()).price);
- }
- const r=await fetch(`https://symbol-search.tradingview.com/symbol_search/?text=${sym}`);
- const j=await r.json();
- return j[0]?.price;
+function redrawAll(){
+ document.querySelectorAll(".drawLayer").forEach(c=>{
+  redraw(c.getContext("2d"),c);
+ });
 }
-
-async function checkAlarms(){
- for(let i=alarms.length-1;i>=0;i--){
-  const a=alarms[i];
-  const price=await getPrice(a.s);
-  if(!price) continue;
-  if((a.d=="up" && price>=a.p) || (a.d=="down" && price<=a.p)){
-   new Audio("https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg").play();
-   if(Notification.permission==="granted"){
-    new Notification("Alarm",{body:`${a.s} → ${price}`});
-   }
-   alarms.splice(i,1);
-   localStorage.setItem("alarms",JSON.stringify(alarms));
-   drawAlarms();
-   redrawAlarmLines();
-  }
- }
-}
-setInterval(checkAlarms,5000);
 </script>
 
 </body>
