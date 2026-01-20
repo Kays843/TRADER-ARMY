@@ -13,43 +13,32 @@
         .grid-2 { grid-template-columns: 1fr 1fr; }
         .grid-4 { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
 
-        /* LOGO VE MARKA AYARI */
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .user-logo {
-            height: 38px; /* Logoyu biraz daha belirgin yaptım */
-            width: auto;
-            border-radius: 4px; /* Hafif yuvarlattım */
-            object-fit: contain;
-        }
+        /* LOGO VE MARKA */
+        .brand-logo { height: 38px; width: auto; object-fit: contain; }
+
+        .control-btn { background: #1e222d; color: #81858e; border: 1px solid #2a2e39; padding: 5px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .active-layout { background: #2962ff !important; color: white !important; }
+        .replay-btn { background: #f23645 !important; color: white !important; border: none; }
+        .replay-btn:hover { background: #d9212e !important; box-shadow: 0 0 15px rgba(242, 54, 69, 0.4); }
 
         .side-panel { width: 300px; background: #131722; border-left: 1px solid #1e222d; display: flex; flex-direction: column; }
         @media (max-width: 1024px) { .side-panel { display: none; } }
 
-        .control-btn { background: #1e222d; color: #81858e; border: 1px solid #2a2e39; padding: 5px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; cursor: pointer; }
-        .active-layout { background: #2962ff !important; color: white !important; }
-
-        .color-popup { background: #1c202b; padding: 15px; border-radius: 12px; border: 1px solid #2962ff; position: absolute; top: 70px; right: 20px; z-index: 9999; display: none; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .color-popup.visible { display: block; }
-
         .icon-btn { font-size: 18px; color: #81858e; transition: 0.2s; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; }
-        .icon-btn:hover { color: #2962ff; background: #1e222d; transform: scale(1.1); }
+        .icon-btn:hover { color: #2962ff; background: #1e222d; }
 
-        iframe { pointer-events: auto !important; touch-action: auto !important; }
+        iframe { pointer-events: auto !important; }
     </style>
 </head>
 <body class="flex flex-col">
 
     <header class="h-16 border-b border-[#1e222d] bg-[#131722] flex items-center justify-between px-4 shrink-0 z-50">
-        <div class="logo-container">
-            <img src="https://g.co/gemini/share/5b0b916c65db" alt="LOGO" class="user-logo" onerror="this.src='https://via.placeholder.com/40x40?text=A'">
+        <div class="flex items-center space-x-4">
+            <img src="BURAYA_LOGO_URL" alt="Logo" class="brand-logo" onerror="this.style.display='none'">
             
-            <div class="flex flex-col leading-tight">
-                <span class="text-white font-black italic text-lg tracking-tighter uppercase">TRADE ARMY</span>
-                <span class="text-blue-500 text-[10px] font-bold tracking-[3px] ml-1">V.1</span>
+            <div class="flex flex-col">
+                <span class="text-white font-black italic text-lg tracking-tighter">TRADE ARMY</span>
+                <span class="text-blue-500 text-[10px] font-bold tracking-[3px]">V.1</span>
             </div>
 
             <div class="flex space-x-1 bg-black/20 p-1 rounded border border-gray-800 ml-4">
@@ -60,30 +49,21 @@
         </div>
 
         <div class="flex items-center space-x-3">
-            <button onclick="toggleColorPanel()" class="control-btn border-blue-500/50">🎨 TEMA</button>
-            <div id="active-symbol-text" class="text-[10px] font-mono text-gray-500 bg-black/40 px-2 py-1 rounded tracking-tighter uppercase">NASDAQ:IXIC</div>
+            <button onclick="openReplay()" class="control-btn replay-btn">⏳ REPLAY MODU</button>
+            <button onclick="toggleColorPanel()" class="control-btn">🎨 TEMA</button>
+            <div id="active-symbol-text" class="text-[10px] font-mono text-gray-500 bg-black/40 px-2 py-1 rounded">NASDAQ:IXIC</div>
         </div>
     </header>
 
-    <div id="colorPicker" class="color-popup w-64">
-        <div class="text-[11px] font-bold text-blue-500 mb-4 uppercase tracking-widest border-b border-gray-700 pb-2">Görünüm Ayarları</div>
-        <div class="space-y-4 text-xs">
-            <div class="flex justify-between items-center"><span>Boğa:</span><input type="color" id="upColor" value="#089981" class="bg-transparent" onchange="saveAndApply()"></div>
-            <div class="flex justify-between items-center"><span>Ayı:</span><input type="color" id="downColor" value="#f23645" class="bg-transparent" onchange="saveAndApply()"></div>
-            <div class="flex justify-between items-center border-t border-gray-700 pt-3"><span>Arka Plan:</span><input type="color" id="bgColor" value="#131722" class="bg-transparent" onchange="saveAndApply()"></div>
-        </div>
-        <button onclick="toggleColorPanel()" class="w-full mt-5 bg-blue-600 text-white font-bold text-[10px] py-2 rounded uppercase">KAYDET</button>
-    </div>
-
     <div class="flex flex-1 overflow-hidden relative">
-        <aside class="w-14 border-r border-[#1e222d] bg-[#0c0d10] flex flex-col items-center py-4 space-y-4 shrink-0 overflow-y-auto">
+        <aside class="w-14 border-r border-[#1e222d] bg-[#0c0d10] flex flex-col items-center py-4 space-y-4 shrink-0">
             <button onclick="updateSymbol('NASDAQ:IXIC')" title="Nasdaq" class="icon-btn">📈</button>
             <button onclick="updateSymbol('FX:EURUSD')" title="EUR/USD" class="icon-btn">🇪🇺</button>
             <button onclick="updateSymbol('BINANCE:BTCUSDT')" title="BTC" class="icon-btn">₿</button>
             <button onclick="updateSymbol('TVC:GOLD')" title="Altın" class="icon-btn">🟡</button>
         </aside>
 
-        <main class="flex-1 relative overflow-hidden bg-black">
+        <main class="flex-1 bg-black overflow-hidden">
             <div id="chart-grid" class="grid-1">
                 <div id="tv_1" class="w-full h-full"></div>
                 <div id="tv_2" class="w-full h-full hidden"></div>
@@ -93,35 +73,24 @@
         </main>
 
         <aside class="side-panel shrink-0">
-            <div class="h-2/3 border-b border-[#1e222d]">
+            <div class="h-1/2 border-b border-[#1e222d]">
                 <div class="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/20">Takip Listesi</div>
-                <div class="tradingview-widget-container h-full">
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js" async>
-                    { "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "90%", "locale": "tr",
-                      "symbolsGroups": [{ "name": "Favoriler", "symbols": [{"name": "NASDAQ:IXIC"},{"name": "BINANCE:BTCUSDT"},{"name": "FX:EURUSD"},{"name": "TVC:GOLD"}] }] }
-                    </script>
-                </div>
+                <div id="watchlist" class="h-full">
+                    </div>
             </div>
-            <div class="h-1/3">
-                <div class="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/20">Haberler</div>
-                <div class="tradingview-widget-container h-full">
-                    <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-timeline.js" async>
-                    { "feedMode": "all_symbols", "colorTheme": "dark", "isTransparent": true, "width": "100%", "height": "100%", "locale": "tr" }
-                    </script>
-                </div>
+            <div class="h-1/2">
+                <div class="p-3 text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-black/20">Piyasa Haberleri</div>
+                <div id="news" class="h-full">
+                    </div>
             </div>
         </aside>
     </div>
 
     <footer class="h-10 bg-black border-t border-gray-900 flex items-center justify-between px-6 text-[9px] text-gray-500 shrink-0">
-        <div class="flex items-center space-x-3">
-            <span class="text-blue-500 font-bold uppercase tracking-tighter">Trade Army V.1</span>
-            <span class="text-gray-800">|</span>
-            <span>© 2026</span>
-        </div>
+        <div>TRADE ARMY <span class="text-blue-500 font-bold ml-1">V.1</span> | © 2026</div>
         <div class="flex items-center space-x-2">
-            <span class="font-bold text-gray-400 uppercase tracking-tight">Yasal Uyarı:</span>
-            <span class="text-gray-600">Yatırım tavsiyesi değildir.</span>
+            <span class="text-red-500 font-bold">YASAL UYARI:</span>
+            <span>Yatırım tavsiyesi değildir.</span>
         </div>
     </footer>
 
@@ -130,35 +99,32 @@
         let currentSymbol = 'NASDAQ:IXIC';
         let currentCount = 1;
 
-        if(localStorage.getItem('upColor')) {
-            document.getElementById('upColor').value = localStorage.getItem('upColor');
-            document.getElementById('downColor').value = localStorage.getItem('downColor');
-            document.getElementById('bgColor').value = localStorage.getItem('bgColor');
-        }
-
-        function toggleColorPanel() { document.getElementById('colorPicker').classList.toggle('visible'); }
-        function saveAndApply() {
-            localStorage.setItem('upColor', document.getElementById('upColor').value);
-            localStorage.setItem('downColor', document.getElementById('downColor').value);
-            localStorage.setItem('bgColor', document.getElementById('bgColor').value);
-            applyColors();
+        function openReplay() {
+            // Replay özelliği sadece ana sitede çalıştığı için kullanıcıyı ilgili paritenin replay sayfasına yönlendirir
+            const url = `https://www.tradingview.com/chart/?symbol=${currentSymbol.replace(':', '%3A')}`;
+            window.open(url, '_blank');
         }
 
         function initChart(id, symbol) {
-            const up = document.getElementById('upColor').value;
-            const down = document.getElementById('downColor').value;
-            const bg = document.getElementById('bgColor').value;
-
             new TradingView.widget({
-                "autosize": true, "symbol": symbol, "interval": "240", "theme": "dark", "style": "1", "locale": "tr",
-                "toolbar_bg": bg, "enable_publishing": false, "hide_side_toolbar": false, "container_id": id,
-                "withdateranges": true, "allow_symbol_change": true,
-                "enabled_features": ["header_resolutions", "header_indicators", "header_settings", "header_symbol_search", "side_toolbar_in_fullscreen_mode"],
-                "overrides": { "paneProperties.background": bg, "mainSeriesProperties.candleStyle.upColor": up, "mainSeriesProperties.candleStyle.downColor": down }
+                "autosize": true,
+                "symbol": symbol,
+                "interval": "240",
+                "theme": "dark",
+                "style": "1",
+                "locale": "tr",
+                "toolbar_bg": "#131722",
+                "enable_publishing": false,
+                "hide_side_toolbar": false,
+                "allow_symbol_change": true,
+                "withdateranges": true, // Geçmişe dönüş için tarih aralığı eklendi
+                "container_id": id,
+                "overrides": {
+                    "paneProperties.background": "#131722"
+                }
             });
         }
 
-        function applyColors() { for (let i = 1; i <= currentCount; i++) initChart(`tv_${i}`, currentSymbol); }
         function changeLayout(count, btn) {
             currentCount = count;
             document.getElementById('chart-grid').className = `grid-${count}`;
