@@ -52,6 +52,7 @@
 <header>
   <strong>TraderArmy</strong>
 
+  <!-- PARİTE SEÇİMİ -->
   <select id="symbolSelect">
     <option value="NASDAQ:US100">US100 (Nasdaq)</option>
     <option value="OANDA:EURUSD">EURUSD</option>
@@ -64,17 +65,26 @@
 
 <footer>
   ⚠️ Yasal Uyarı: Bu sitede yer alan bilgiler yatırım tavsiyesi değildir.
-  Tüm işlemler kullanıcı sorumluluğundadır.
+  Finansal işlemler risk içerir, tüm sorumluluk kullanıcıya aittir.
 </footer>
 
+<!-- 1️⃣ ÖNCE TradingView KÜTÜPHANESİ -->
+<script src="https://s3.tradingview.com/tv.js"></script>
+
+<!-- 2️⃣ SONRA BİZİM KOD -->
 <script>
-  const defaultSymbol = localStorage.getItem("symbol") || "NASDAQ:US100";
+  let widget;
+
   const select = document.getElementById("symbolSelect");
-  select.value = defaultSymbol;
+  const savedSymbol = localStorage.getItem("symbol") || "NASDAQ:US100";
+  select.value = savedSymbol;
 
   function loadChart(symbol) {
-    document.getElementById("chart").innerHTML = "";
-    new TradingView.widget({
+    if (widget) {
+      widget.remove();
+    }
+
+    widget = new TradingView.widget({
       container_id: "chart",
       autosize: true,
       symbol: symbol,
@@ -83,26 +93,22 @@
       theme: "dark",
       style: "1",
       locale: "tr",
-      allow_symbol_change: true,
-      save_image: false,
-      withdateranges: true,
       hide_side_toolbar: false,
-      studies: [],
-      details: true,
-      hotlist: true,
-      calendar: true
+      allow_symbol_change: true,
+      withdateranges: true,
+      save_image: true
     });
   }
 
-  loadChart(defaultSymbol);
+  // ilk açılış
+  loadChart(savedSymbol);
 
-  select.addEventListener("change", () => {
-    localStorage.setItem("symbol", select.value);
-    loadChart(select.value);
+  // parite değişince
+  select.addEventListener("change", function () {
+    localStorage.setItem("symbol", this.value);
+    loadChart(this.value);
   });
 </script>
-
-<script src="https://s3.tradingview.com/tv.js"></script>
 
 </body>
 </html>
