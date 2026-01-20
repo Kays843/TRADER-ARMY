@@ -10,7 +10,7 @@ body{
     margin:0;
     background:#111;
     color:#fff;
-    font-family:Arial;
+    font-family:Arial, sans-serif;
 }
 .center{
     height:100vh;
@@ -25,6 +25,7 @@ body{
     padding:30px;
     border-radius:10px;
 }
+h2{text-align:center}
 input{
     width:100%;
     padding:12px;
@@ -56,8 +57,8 @@ header{
     height:50px;
     background:#1c1c1c;
     display:flex;
-    align-items:center;
     justify-content:space-between;
+    align-items:center;
     padding:0 15px;
 }
 #tv{
@@ -79,7 +80,7 @@ footer{
 
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN / REGISTER -->
 <div id="login" class="center">
     <div class="box">
         <h2 id="title">Giriş Yap</h2>
@@ -88,12 +89,12 @@ footer{
         <input id="email" placeholder="E-posta">
         <input id="password" type="password" placeholder="Şifre">
 
-        <button onclick="submitForm()" id="btn">Giriş Yap</button>
+        <button id="btn" onclick="submitForm()">Giriş Yap</button>
         <div class="switch" onclick="toggle()">Hesabın yok mu? Kayıt Ol</div>
     </div>
 </div>
 
-<!-- CHART -->
+<!-- APP -->
 <div id="app" style="display:none;">
     <header>
         <div>📊 Trading Platform</div>
@@ -103,8 +104,8 @@ footer{
     <div id="tv"></div>
 
     <footer>
-        Yasal Uyarı: Bu sitede yer alan grafikler ve içerikler yatırım danışmanlığı değildir.
-        Finansal işlemler risk içerir, sorumluluk kullanıcıya aittir.
+        Yasal Uyarı: Bu platformda yer alan grafik ve bilgiler yatırım danışmanlığı değildir.
+        Finansal işlemler risk içerir, tüm sorumluluk kullanıcıya aittir.
     </footer>
 </div>
 
@@ -118,18 +119,19 @@ if(localStorage.getItem("loggedIn")){
 
 function toggle(){
     loginMode = !loginMode;
-    title.innerText = loginMode ? "Giriş Yap" : "Kayıt Ol";
-    btn.innerText = loginMode ? "Giriş Yap" : "Kayıt Ol";
+    document.getElementById("title").innerText = loginMode ? "Giriş Yap" : "Kayıt Ol";
+    document.getElementById("btn").innerText = loginMode ? "Giriş Yap" : "Kayıt Ol";
     document.querySelector(".switch").innerText =
         loginMode ? "Hesabın yok mu? Kayıt Ol" : "Hesabın var mı? Giriş Yap";
-    error.innerText="";
+    document.getElementById("error").innerText="";
 }
 
 function submitForm(){
-    const emailVal = email.value;
-    const passVal = password.value;
+    const email = document.getElementById("email").value;
+    const pass = document.getElementById("password").value;
+    const error = document.getElementById("error");
 
-    if(!emailVal || !passVal){
+    if(!email || !pass){
         error.innerText="Boş bırakma kanka";
         return;
     }
@@ -137,17 +139,17 @@ function submitForm(){
     let users = JSON.parse(localStorage.getItem("users")) || {};
 
     if(loginMode){
-        if(users[emailVal] === passVal){
-            localStorage.setItem("loggedIn", emailVal);
+        if(users[email] === pass){
+            localStorage.setItem("loggedIn", email);
             showApp();
         }else{
             error.innerText="Hatalı giriş";
         }
     }else{
-        if(users[emailVal]){
-            error.innerText="Bu mail kayıtlı";
+        if(users[email]){
+            error.innerText="Bu mail zaten kayıtlı";
         }else{
-            users[emailVal] = passVal;
+            users[email] = pass;
             localStorage.setItem("users", JSON.stringify(users));
             error.innerText="Kayıt başarılı, giriş yap";
             toggle();
