@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TerminalPro Split Screen</title>
+<title>TerminalPro</title>
 
 <style>
     body {
@@ -16,27 +16,91 @@
         overflow: hidden;
     }
 
-    /* Sol Menü */
+    /* SOL SUPER MENU */
     .sidebar {
-        width: 240px;
-        background: #0f1117;
-        padding: 20px 10px;
+        width: 260px;
+        background: linear-gradient(180deg, #0f1117 0%, #0b0c10 100%);
+        padding: 20px 15px;
+        border-right: 1px solid #1a1d24;
         overflow-y: auto;
-        border-right: 1px solid #1c1f26;
     }
-
-    /* Üst Bar */
-    .topbar {
-        height: 48px;
+    .logo {
+        font-size: 22px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 25px;
+        color: #4ba3ff;
+    }
+    .section-title {
+        font-size: 12px;
+        opacity: .6;
+        margin: 20px 0 8px 5px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .menu-item {
         display: flex;
         align-items: center;
-        padding: 0 15px;
-        background: #12141b;
-        border-bottom: 1px solid #1d1f27;
-        justify-content: space-between;
+        padding: 10px;
+        margin-bottom: 5px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: 0.15s;
+    }
+    .menu-item:hover {
+        background: #1c1f26;
+        transform: translateX(3px);
+    }
+    .menu-item i {
+        margin-right: 10px;
+        opacity: .8;
     }
 
-    /* Split Screen Butonları */
+    /* SOL TOOLBAR */
+    .toolbar {
+        width: 50px;
+        background: #13151b;
+        border-right: 1px solid #22252d;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 12px;
+        gap: 12px;
+    }
+    .tool-btn {
+        width: 32px;
+        height: 32px;
+        background: #1c1f26;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        transition: 0.15s;
+    }
+    .tool-btn:hover {
+        background: #2a2d36;
+        transform: scale(1.07);
+    }
+
+    /* ANA ALAN */
+    .main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .topbar {
+        height: 48px;
+        background: #12141b;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 15px;
+        border-bottom: 1px solid #1a1d24;
+    }
+
     .split-buttons button {
         margin-left: 6px;
         padding: 6px 10px;
@@ -47,63 +111,74 @@
         cursor: pointer;
     }
     .split-buttons button:hover {
-        background: #2a2d36;
+        background: #2c2f3b;
     }
 
-    /* Grafik Alanı */
-    .main {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-
+    /* CHART GRID */
     .charts {
         flex: 1;
         display: grid;
         gap: 5px;
         padding: 5px;
     }
-
     .chart-box {
         background: #10131a;
         border: 1px solid #1b1e25;
-        position: relative;
+    }
+
+    /* FOOTER */
+    .footer {
+        height: 32px;
+        background: #0e0f12;
+        border-top: 1px solid #1a1d24;
+        font-size: 11px;
+        color: #929292;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 </style>
+
 </head>
 <body>
 
-<!-- Sol Menü -->
+<!-- SOL MENÜ -->
 <div class="sidebar">
-    <h2 style="text-align:center; margin-bottom:15px; color:#4ba3ff;">TERMINALPRO</h2>
+    <div class="logo">TERMINALPRO</div>
 
-    <h3>KRİPTO</h3>
-    <div class="menu-item">Bitcoin (BTC)</div>
-    <div class="menu-item">Ethereum (ETH)</div>
-    <div class="menu-item">Solana (SOL)</div>
-    <div class="menu-item">Ripple (XRP)</div>
+    <div class="section-title">KRİPTO</div>
+    <div class="menu-item"><i>🟠</i> Bitcoin (BTC)</div>
+    <div class="menu-item"><i>🟣</i> Ethereum (ETH)</div>
+    <div class="menu-item"><i>🔵</i> Solana (SOL)</div>
+    <div class="menu-item"><i>🔹</i> Ripple (XRP)</div>
 
-    <h3>DÖVİZ & EMTİA</h3>
-    <div class="menu-item">Dolar/TL (TRY)</div>
-    <div class="menu-item">Altın (XAU)</div>
-    <div class="menu-item">Gümüş (XAG)</div>
+    <div class="section-title">DÖVİZ & EMTİA</div>
+    <div class="menu-item"><i>💵</i> USD/TRY</div>
+    <div class="menu-item"><i>🥇</i> Altın (XAU)</div>
+    <div class="menu-item"><i>🥈</i> Gümüş (XAG)</div>
 
-    <h3>GLOBAL</h3>
-    <div class="menu-item">Tesla (TSLA)</div>
-    <div class="menu-item">Apple (AAPL)</div>
-    <div class="menu-item">Nvidia (NVDA)</div>
+    <div class="section-title">HİSSELER</div>
+    <div class="menu-item"><i>🚗</i> Tesla (TSLA)</div>
+    <div class="menu-item"><i>📱</i> Apple (AAPL)</div>
+    <div class="menu-item"><i>💻</i> Nvidia (NVDA)</div>
 </div>
 
-<!-- Ana Alan -->
+<!-- SOL TOOLBAR -->
+<div class="toolbar">
+    <div class="tool-btn">／</div>
+    <div class="tool-btn">✏️</div>
+    <div class="tool-btn">＋</div>
+    <div class="tool-btn">T</div>
+    <div class="tool-btn">↔</div>
+    <div class="tool-btn">🔒</div>
+</div>
+
+<!-- ANA ALAN -->
 <div class="main">
 
-    <!-- Üst Bar -->
     <div class="topbar">
-        <div>
-            Bitcoin 93.011 (-0.71%) — Ethereum — Solana — USD/TRY
-        </div>
+        <div>BTC — ETH — SOL — USD/TRY</div>
 
-        <!-- Split Buttons -->
         <div class="split-buttons">
             <button onclick="setSplit(1)">1</button>
             <button onclick="setSplit(2)">2</button>
@@ -112,12 +187,14 @@
         </div>
     </div>
 
-    <!-- Grafik Alanı -->
     <div id="charts" class="charts"></div>
+
+    <div class="footer">
+        TerminalPro © 2026 — Bu platform yatırım tavsiyesi vermez. Finansal işlemler risk içerir.
+    </div>
 
 </div>
 
-<!-- TradingView Script -->
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <script>
@@ -127,7 +204,6 @@ function loadCharts(count) {
     const container = document.getElementById("charts");
     container.innerHTML = "";
 
-    // Grid layout değişimi
     if (count === 1) container.style.gridTemplateColumns = "1fr";
     if (count === 2) container.style.gridTemplateColumns = "1fr 1fr";
     if (count === 3) container.style.gridTemplateColumns = "1fr 1fr";
@@ -147,9 +223,7 @@ function loadCharts(count) {
             interval: "D",
             theme: "dark",
             style: "1",
-            locale: "tr",
-            toolbar_bg: "#131722",
-            enable_publishing: false
+            locale: "tr"
         });
     }
 }
@@ -158,7 +232,7 @@ function setSplit(n) {
     loadCharts(n);
 }
 
-loadCharts(1); // başlangıçta tek grafik
+loadCharts(1);
 </script>
 
 </body>
