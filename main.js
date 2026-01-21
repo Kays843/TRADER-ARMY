@@ -1,3 +1,25 @@
+async function loadSymbol(symbol) {
+
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1h&range=1mo`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const result = data.chart.result[0];
+
+    const timestamps = result.timestamp;
+    const quotes = result.indicators.quote[0];
+
+    const candles = timestamps.map((t, i) => ({
+        time: t,
+        open: quotes.open[i],
+        high: quotes.high[i],
+        low: quotes.low[i],
+        close: quotes.close[i]
+    }));
+
+    candleSeries.setData(candles);
+}
 /* ============================================================
     1) GRAFİK — Lightweight Charts
 ============================================================ */
