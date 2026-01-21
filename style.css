@@ -6,27 +6,27 @@ body {
 
 #chart {
     position: absolute;
-    left: 50px;
-    top: 0;
-    width: calc(100vw - 50px);
-    height: 100vh;
+    left: 60px;
+    top: 50px;
+    width: calc(100vw - 60px);
+    height: calc(100vh - 50px);
 }
 
 #drawCanvas {
     position: absolute;
-    left: 50px;
-    top: 0;
-    width: calc(100vw - 50px);
-    height: 100vh;
+    left: 60px;
+    top: 50px;
+    width: calc(100vw - 60px);
+    height: calc(100vh - 50px);
     z-index: 4;
 }
 
 #toolbar {
     position: absolute;
-    top: 0;
+    top: 50px;
     left: 0;
-    width: 50px;
-    height: 100vh;
+    width: 60px;
+    height: calc(100vh - 50px);
     background: #14161d;
     border-right: 1px solid #1f222a;
     display: flex;
@@ -51,10 +51,28 @@ body {
     border: 1px solid #2a2d36;
 }
 
-.tool:hover {
-    background: #2a2d36;
+.tool.active {
+    background: #4ba3ff;
 }
 
-.tool.active {
+#pairs {
+    position: absolute;
+    top: 5px;
+    left: 60px;
+    z-index: 20;
+    display: flex;
+    gap: 8px;
+}
+
+#pairs button {
+    background: #1d1f27;
+    border: 1px solid #2b2e39;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#pairs button:hover {
     background: #4ba3ff;
 }
