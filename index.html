@@ -7,49 +7,102 @@
 <script src="https://s3.tradingview.com/tv.js"></script>
 
 <style>
-body{margin:0;background:#0d0d0d;color:#fff;font-family:Arial;}
 
-#newsTicker{background:#111;border-bottom:1px solid #222;height:38px;display:flex;
-align-items:center;white-space:nowrap;overflow:hidden;}
-#newsTicker span{background:#b71c1c;padding:6px 12px;font-weight:bold;margin-right:10px;}
-#tickerContent{color:#ddd;font-size:13px;animation:ticker 25s linear infinite;}
-@keyframes ticker{0%{transform:translateX(100%);}100%{transform:translateX(-100%);}}
+/* ==== SOFT PRO BLUE OVERRIDE (HER ŞEYİN ÜSTÜNDE DURACAK) ==== */
 
-/* HEADER */
-header{background:#111;padding:10px;display:flex;gap:10px;flex-wrap:wrap;border-bottom:1px solid #222;}
-button,select,input{background:#1a1a1a;color:#fff;border:1px solid #333;padding:6px 10px;border-radius:4px;}
+body{
+    background:#0b1220 !important;
+    color:#dbe4ff !important;
+    margin:0;
+    font-family:Arial;
+}
 
-#calendar-block{background:#0f0f0f;border-bottom:1px solid #222;}
+header, .toolbar, .alarm-box, footer, #newsTicker, #calendar-block{
+    background:#111827 !important;
+    border-color:#1e293b !important;
+}
 
+.chart-box{
+    background:#0f172a !important;
+    border:1px solid #1e293b !important;
+}
+
+button, select, input{
+    background:#1e293b !important;
+    color:#dbe4ff !important;
+    border:1px solid #334155 !important;
+    padding:6px 10px;
+    border-radius:4px;
+}
+
+button:hover, select:hover{
+    background:#2563eb !important;
+    border-color:#3b82f6 !important;
+}
+
+.alarm-list{
+    color:#cdd6f4 !important;
+}
+
+#tickerContent{
+    color:#cdd6f4 !important;
+}
+
+/* HABER BANDI */
+#newsTicker{
+    height:38px;
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+}
+#newsTicker span{
+    background:#b91c1c;
+    color:#fff;
+    padding:6px 12px;
+    margin-right:10px;
+    font-weight:bold;
+}
+#tickerContent{
+    white-space:nowrap;
+    font-size:13px;
+    animation:ticker 25s linear infinite;
+}
+
+@keyframes ticker{
+    0%{transform:translateX(100%)}
+    100%{transform:translateX(-100%)}
+}
+
+/* GRID */
 #charts{
     display:grid;
     height:calc(100vh - 350px);
     transition:0.3s;
 }
 
-.chart-box{
-    border:1px solid #222;
-    display:flex;
-    flex-direction:column;
+.chart{
+    flex:1;
+    min-height:0;
 }
 
 .toolbar{
-    background:#111;
-    border-bottom:1px solid #222;
     padding:6px;
     display:flex;
     gap:6px;
 }
 
-.chart{
-    flex:1;
-    min-height:0;   /* CRITICAL: 4’lü modda sıkışmayı engeller */
+.alarm-box{
+    padding:6px;
+    display:flex;
+    gap:6px;
 }
 
-.alarm-box{background:#111;padding:6px;border-top:1px solid #222;display:flex;gap:6px;}
-.alarm-list{color:#ccc;font-size:12px;padding:6px;border-top:1px solid #222;}
+footer{
+    padding:10px;
+    text-align:center;
+    font-size:12px;
+}
 
-footer{background:#111;color:#aaa;padding:10px;text-align:center;border-top:1px solid #222;font-size:12px;}
 </style>
 </head>
 
@@ -90,13 +143,17 @@ footer{background:#111;color:#aaa;padding:10px;text-align:center;border-top:1px 
     </div>
 </div>
 
+<!-- GRAFİKLER -->
 <div id="charts"></div>
 
+<!-- FOOTER -->
 <footer>
-⚠️ Bu platform yatırım tavsiyesi değildir. Finansal işlemler kullanıcı sorumluluğundadır.
+⚠️ Bu platform yatırım tavsiyesi değildir. Finansal işlemlerin risk ve sorumluluğu kullanıcıya aittir.
 </footer>
 
+
 <script>
+
 /* PARİTE LİSTESİ */
 const symbolsList = [
     "FX:EURUSD","FX:GBPUSD","FX:USDJPY","FX:XAUUSD","FX:USDTRY",
@@ -104,21 +161,29 @@ const symbolsList = [
     "OANDA:NAS100","OANDA:SPX500","OANDA:US30"
 ];
 
-/* HABER BANDI */
-const tick=["ABD TÜFE (CPI) – Yüksek Etki","FED Faiz Kararı – Yüksek Etki","NFP Tarım Dışı – Yüksek Etki","ECB Faiz Kararı – Yüksek Etki","BOE Faiz Kararı – Yüksek Etki"];
-let ti=0;
-function rot(){document.getElementById("tickerContent").innerText=tick[ti];ti=(ti+1)%tick.length;}
-rot(); setInterval(rot,6000);
+/* DEFAULT PARİTELER */
+const defaults=["FX:EURUSD","BINANCE:BTCUSDT","OANDA:NAS100","FX:XAUUSD"];
 
-/* LAYOUT */
+/* VARIABLES */
 let layout=1;
 let calendarVisible=true;
 let alarms=JSON.parse(localStorage.getItem("alarms")||"[]");
 let chartSymbols=[];
 
-const defaults=["FX:EURUSD","BINANCE:BTCUSDT","OANDA:NAS100","FX:XAUUSD"];
-
-function setLayout(n){ layout=n; render(); }
+/* HABER BANDI */
+const tick=[
+"ABD TÜFE (CPI) – Yüksek Etki",
+"FED Faiz Kararı – Yüksek Etki",
+"NFP Tarım Dışı – Yüksek Etki",
+"ECB Faiz Kararı – Yüksek Etki",
+"BOE Faiz Kararı – Yüksek Etki"
+];
+let ti=0;
+function rot(){
+    document.getElementById("tickerContent").innerText=tick[ti];
+    ti=(ti+1)%tick.length;
+}
+rot(); setInterval(rot,6000);
 
 /* TAKVİM AÇ KAPA */
 function toggleCalendar(){
@@ -132,12 +197,13 @@ function toggleCalendar(){
         cal.style.display="block";
         ch.style.height="calc(100vh - 350px)";
     }
+
     calendarVisible=!calendarVisible;
 
-    setTimeout(()=>window.dispatchEvent(new Event('resize')),50);
+    setTimeout(()=>window.dispatchEvent(new Event("resize")),50);
 }
 
-/* DROPDOWN OLUŞTUR */
+/* DROPDOWN */
 function makeDropdown(i){
     let html="";
     for(const s of symbolsList){
@@ -145,6 +211,12 @@ function makeDropdown(i){
         html+=`<option ${sel} value="${s}">${s}</option>`;
     }
     return html;
+}
+
+/* LAYOUT */
+function setLayout(n){
+    layout=n;
+    render();
 }
 
 /* RENDER */
@@ -165,15 +237,12 @@ function render(){
         area.style.gridTemplateRows="1fr 1fr";
     }
 
-    for(let i=0;i<layout;i++){
-        createBox(i);
-    }
+    for(let i=0;i<layout;i++) createBox(i);
 
-    /* CRITICAL FIX: grafikleri yeniden boyutlandır */
-    setTimeout(()=>window.dispatchEvent(new Event('resize')),50);
+    setTimeout(()=>window.dispatchEvent(new Event("resize")),50);
 }
 
-/* BOX OLUŞTUR */
+/* GRAFİK KUTUSU */
 function createBox(i){
     const area=document.getElementById("charts");
 
@@ -201,7 +270,7 @@ function createBox(i){
     const al=document.createElement("div");
     al.className="alarm-box";
     al.innerHTML=`<input id="al${i}" placeholder="Alarm fiyat">
-                  <button onclick="addAlarm(${i})">Alarm</button>`;
+                  <button onclick="addAlarm(${i})">+</button>`;
 
     const list=document.createElement("div");
     list.className="alarm-list";
@@ -232,16 +301,18 @@ function loadChart(i){
     });
 }
 
+/* PARİTE DEĞİŞİMİ */
 function chgSym(i,v){
     chartSymbols[i]=v;
     render();
 }
 
+/* TIMEFRAME */
 function chgTf(i,v){
     render();
 }
 
-/* ALARM */
+/* ALARM EKLE */
 function addAlarm(i){
     const sym=chartSymbols[i];
     const price=parseFloat(document.getElementById("al"+i).value);
@@ -252,20 +323,25 @@ function addAlarm(i){
     refreshList(i);
 }
 
+/* ALARM LİSTE */
 function refreshList(i){
     const list=alarms.filter(a=>a.sym===chartSymbols[i]);
-    document.getElementById("list"+i).innerHTML=
+    document.getElementById("list"+i).innerHTML =
         list.map(a=>`${a.sym} → ${a.price}`).join("<br>");
 }
 
+/* ALARM KONTROL */
 async function checkA(){
     for(const a of alarms){
+        
+        /* KRİPTO */
         if(a.sym.startsWith("BINANCE:")){
             const p=a.sym.replace("BINANCE:","");
             const j=await(await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${p}`)).json();
             if(parseFloat(j.price)>=a.price) alertAlarm(a);
         }
 
+        /* FOREX */
         if(a.sym.startsWith("FX:")){
             const p=a.sym.replace("FX:",""), base=p.slice(0,3), q=p.slice(3);
             const j=await(await fetch(`https://api.exchangerate.host/latest?base=${base}&symbols=${q}`)).json();
@@ -281,8 +357,8 @@ function alertAlarm(a){
 
 setInterval(checkA,5000);
 
-/* BAŞLAT */
 render();
+
 </script>
 
 </body>
