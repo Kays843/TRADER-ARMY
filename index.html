@@ -8,7 +8,7 @@
 
 <style>
 
-/* ==== SOFT PRO BLUE OVERRIDE (HER ŞEYİN ÜSTÜNDE DURACAK) ==== */
+/* ==== SOFT PRO BLUE OVERRIDE ==== */
 
 body{
     background:#0b1220 !important;
@@ -73,10 +73,10 @@ button:hover, select:hover{
     100%{transform:translateX(-100%)}
 }
 
-/* GRID */
+/* GRID — BURASI BÜYÜK GRAFİK FIX! */
 #charts{
     display:grid;
-    height:calc(100vh - 350px);
+    height:calc(100vh - 120px); /* ✔ 120px = İdeal büyük grafik */
     transition:0.3s;
 }
 
@@ -148,9 +148,8 @@ footer{
 
 <!-- FOOTER -->
 <footer>
-⚠️ Bu platform yatırım tavsiyesi değildir. Finansal işlemlerin risk ve sorumluluğu kullanıcıya aittir.
+⚠️ Bu platform yatırım tavsiyesi değildir. Tüm finansal risk kullanıcıya aittir.
 </footer>
-
 
 <script>
 
@@ -161,10 +160,10 @@ const symbolsList = [
     "OANDA:NAS100","OANDA:SPX500","OANDA:US30"
 ];
 
-/* DEFAULT PARİTELER */
+/* DEFAULT */
 const defaults=["FX:EURUSD","BINANCE:BTCUSDT","OANDA:NAS100","FX:XAUUSD"];
 
-/* VARIABLES */
+/* STATE */
 let layout=1;
 let calendarVisible=true;
 let alarms=JSON.parse(localStorage.getItem("alarms")||"[]");
@@ -185,7 +184,7 @@ function rot(){
 }
 rot(); setInterval(rot,6000);
 
-/* TAKVİM AÇ KAPA */
+/* TAKVİM AÇ/KAPA */
 function toggleCalendar(){
     const cal=document.getElementById("calendar-block");
     const ch=document.getElementById("charts");
@@ -193,9 +192,9 @@ function toggleCalendar(){
     if(calendarVisible){
         cal.style.display="none";
         ch.style.height="calc(100vh - 80px)";
-    } else {
+    }else{
         cal.style.display="block";
-        ch.style.height="calc(100vh - 350px)";
+        ch.style.height="calc(100vh - 120px)";
     }
 
     calendarVisible=!calendarVisible;
@@ -213,7 +212,7 @@ function makeDropdown(i){
     return html;
 }
 
-/* LAYOUT */
+/* LAYOUT SEÇ */
 function setLayout(n){
     layout=n;
     render();
@@ -242,7 +241,7 @@ function render(){
     setTimeout(()=>window.dispatchEvent(new Event("resize")),50);
 }
 
-/* GRAFİK KUTUSU */
+/* BOX */
 function createBox(i){
     const area=document.getElementById("charts");
 
@@ -283,7 +282,7 @@ function createBox(i){
     refreshList(i);
 }
 
-/* GRAFİK */
+/* GRAFİK OLUŞTUR */
 function loadChart(i){
     if(!chartSymbols[i]) chartSymbols[i]=defaults[i]||"FX:EURUSD";
 
@@ -301,7 +300,7 @@ function loadChart(i){
     });
 }
 
-/* PARİTE DEĞİŞİMİ */
+/* PARİTE DEĞİŞTİR */
 function chgSym(i,v){
     chartSymbols[i]=v;
     render();
@@ -323,7 +322,7 @@ function addAlarm(i){
     refreshList(i);
 }
 
-/* ALARM LİSTE */
+/* ALARM LİSTESİ */
 function refreshList(i){
     const list=alarms.filter(a=>a.sym===chartSymbols[i]);
     document.getElementById("list"+i).innerHTML =
@@ -333,7 +332,7 @@ function refreshList(i){
 /* ALARM KONTROL */
 async function checkA(){
     for(const a of alarms){
-        
+
         /* KRİPTO */
         if(a.sym.startsWith("BINANCE:")){
             const p=a.sym.replace("BINANCE:","");
